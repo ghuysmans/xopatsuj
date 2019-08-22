@@ -5,5 +5,6 @@ let () =
   List.iter @@ function
     | Ast.Definition d ->
       Compiler.add env d
-    | Ast.Assignment (t, _v) ->
-      Printf.printf "assigned %s\n" t
+    | Ast.Assignment (t, v) ->
+      let t = Compiler.find env t in
+      ignore (Validator.unify t v)

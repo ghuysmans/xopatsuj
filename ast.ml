@@ -1,12 +1,13 @@
 type 'r atom =
-  | Length of int
+  | Empty of int
+  | Assigned of int array
   | Ref of 'r
   [@@deriving show {with_path = false}]
 
 type 'r def = {
   name: string;
   (* is *)
-  parts: 'r atom list;
+  parts: 'r atom array;
 } [@@deriving show {with_path = false}]
 
 type stmt =

@@ -1,47 +1,42 @@
 open Ast
 
 type 'a m = {actual: 'a; expected: 'a}
-exception Mismatch of int array m
-exception Too_short
 exception Too_long of int m
+exception Too_short
+exception Inconsistent_data of string * int array m
 
-let unify (env: Env.t) (typ, value) =
-  let substs = Hashtbl.create 10 (* FIXME? *) in
-  let expected = Array.length value in
-  let rec f i {name; parts} = (* returns an index *)
-    if Hashtbl.mem substs name then
-      let offset, length = Hashtbl.find substs name in
-      if i + length > expected || offset + length > expected then
-        raise Too_short
-      else
-        let actual = Array.sub value i length in
-        let expected = Array.sub value offset length in
-        if actual = expected then
-          i + length
+let foldi_left f init a =
+  Array.fold_left (fun (i, acc) x -> i + 1, f ~i acc x) (0, init) a |> snd
+
+let unify typ value =
+  let rec f start (Compiler.U {name; parts}) = (* returns an index *)
+    parts |> foldi_left (fun ~i pos -> function
+      | Empty len ->
+        if pos < Array.length value && pos + len <= Array.length value then
+          parts.(i) <- Assigned (Array.sub value pos len)
         else
-          raise (Mismatch {actual; expected})
-    else
-      let i' = List.fold_left (fun i (U x) ->
-        match x with
-        | Ref u -> f i u
-        | Length length ->
-            v := Content {offset = i; length};
-            i + length
-      ) i parts in
-      Hashtbl.add substs def (i, i' - i)
+          raise Too_short;
+        pos + len
+      | Assigned expected ->
+        let len = Array.length expected in
+        if pos < Array.length value && pos + len <= Array.length value then
+          let actual = Array.sub value pos len in
+          if expected = actual then
+            pos + Array.length expected
+          else
+            raise (Inconsistent_data (name, {expected; actual}))
+        else
+          raise Too_short
+      | Ref u ->
+        f pos u
+    ) start
   in
-  let u =
-    match find env typ with
-    | Value u -> !u
-    | Ref r -> r
-  in
-  let actual = f 0 u in
-  if actual = expected then
-    ()
-  else
-    raise (Too_long {actual; expected})
+  let actual = f 0 typ in
+  let expected = Array.length value in
+  if actual <> expected then raise (Too_long {expected; actual})
 
 
+(*
 let () =
   List.iter (check Env.sample) [
     (*
@@ -55,3 +50,4 @@ let () =
     "SEQ", [| 1; 10; 1; 1; 1; 1; 2; 2; 2; 10 |];
     *)
   ]
+*)

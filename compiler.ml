@@ -13,7 +13,8 @@ let find env name =
 
 let link env = function
   | Ref name -> Ref (find env name)
-  | Length _ as l -> l
+  | Empty _ as l -> l
+  | Assigned _ as a -> a
 
 exception Redefinition of string
 
@@ -22,7 +23,7 @@ let add env {name; parts} =
     (* avoid shadowing *)
     raise (Redefinition name)
   else
-    let parts = List.map (link env) parts in
+    let parts = Array.map (link env) parts in
     Hashtbl.add env name (U {name; parts})
 
 let create () =
@@ -32,9 +33,9 @@ let create () =
 let sample =
   let env = create () in
   List.iter (add env) [
-    {name = "A"; parts = [Length 1]};
-    {name = "B"; parts = [Length 3]};
-    {name = "C"; parts = [Ref "A"; Ref "B"]};
-    {name = "SEQ"; parts = [Length 1; Ref "A"; Length 4; Ref "C"; Ref "B"; Ref "A"]};
+    {name = "A"; parts = [|Empty 1|]};
+    {name = "B"; parts = [|Empty 3|]};
+    {name = "C"; parts = [|Ref "A"; Ref "B"|]};
+    {name = "SEQ"; parts = [|Empty 1; Ref "A"; Empty 4; Ref "C"; Ref "B"; Ref "A"|]};
   ];
   env
