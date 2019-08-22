@@ -7,4 +7,5 @@ let () =
     Format.printf "%a\n" pp_token token;
     if token != EOF then f ()
   in
-  f ()
+  f ();
+  Format.(pp_print_flush std_formatter ())

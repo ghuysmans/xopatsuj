@@ -3,4 +3,5 @@ open Ast
 let () =
   let lexbuf = Lexing.from_channel stdin in
   let stmts = UVa_parser.prog UVa_lexer.top lexbuf in
-  Format.printf "%a\n" pp stmts
+  Format.printf "%a\n" pp stmts;
+  Format.(pp_print_flush std_formatter ())
