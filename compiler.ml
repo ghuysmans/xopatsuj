@@ -29,6 +29,12 @@ let add env {name; parts; loc} =
 let create () =
   Hashtbl.create 10
 
+let reset h =
+  h |> Hashtbl.iter @@ fun _ (U {parts; _}) ->
+    parts |> Array.iteri @@ fun i -> function
+      | Assigned l -> parts.(i) <- Empty (Array.length l)
+      | _ -> ()
+
 
 let sample =
   let env = create () in

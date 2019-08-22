@@ -10,6 +10,7 @@ let () =
       | Ast.Assignment ((n, l), v) ->
         let t = Compiler.find env n in
         let open Format in
+        Compiler.reset env;
         try
           Validator.unify t v
         with
