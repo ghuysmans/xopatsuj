@@ -41,3 +41,6 @@ let () =
   | Failure _ -> (* FIXME? *)
     Printf.eprintf "%d: unexpected character\n" (lexbuf.Lexing.lex_curr_p.pos_lnum);
     exit 1
+  | Compiler.Unbound_type n ->
+    Printf.eprintf "%d: unbound type %s\n" (lexbuf.Lexing.lex_curr_p.pos_lnum) n;
+    exit 3
