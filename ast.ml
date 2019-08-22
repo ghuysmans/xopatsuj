@@ -10,9 +10,7 @@ type 'r def = {
   parts: 'r atom array;
 } [@@deriving show {with_path = false}]
 
-type stmt =
+type t =
   | Definition of string def
   | Assignment of (string * int) * int array
   [@@deriving show {with_path = false}]
-
-type t = stmt list [@@deriving show {with_path = false}]

@@ -3,8 +3,8 @@ let () =
   let env = Compiler.create () in
   let err = ref false in
   try
-    UVa_parser.prog UVa_lexer.top lexbuf |>
-    List.iter (function
+    while true do
+      match UVa_parser.stmt UVa_lexer.top lexbuf with
       | Ast.Definition d ->
         Compiler.add env d
       | Ast.Assignment ((n, l), v) ->
@@ -31,10 +31,11 @@ let () =
             pp_print_list ~pp_sep pp_print_string ppf
           in
           eprintf "%d:%a: expected %a, got %a\n" l pp' p pp expected pp actual
-    );
+    done
+  with
+  | End_of_file ->
     Format.(pp_print_flush err_formatter ());
     if !err then exit 2
-  with
   | UVa_parser.Error ->
     Printf.eprintf "%d: syntax error\n" (lexbuf.Lexing.lex_curr_p.pos_lnum);
     exit 1
