@@ -12,7 +12,7 @@ type 'r def = {
 
 type stmt =
   | Definition of string def
-  | Assignment of string * int array
+  | Assignment of (string * int) * int array
   [@@deriving show {with_path = false}]
 
 type t = stmt list [@@deriving show {with_path = false}]

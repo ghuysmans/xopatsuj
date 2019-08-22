@@ -15,7 +15,7 @@ rule top = parse
 | [' ' '\t'] { top lexbuf }
 | '.' newline { next_line lexbuf; UVa_parser.NL }
 | "is" { UVa_parser.IS }
-| id as id { UVa_parser.ID id }
+| id as id { UVa_parser.ID (id, lexbuf.lex_curr_p.pos_lnum) }
 | '[' (num as num) ']' { UVa_parser.LENGTH (int_of_string num) }
 | "=" { UVa_parser.EQUAL }
 | num as num { UVa_parser.NUM (int_of_string num) }

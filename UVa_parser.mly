@@ -1,4 +1,4 @@
-%token <string> ID
+%token <string * int> ID
 %token IS
 %token <int> LENGTH
 %token NL
@@ -10,8 +10,8 @@
 
 atom:
   | LENGTH { Ast.Empty $1 }
-  | ID { Ast.Ref $1 }
+  | ID { Ast.Ref (fst $1) }
 stmt:
-  | name=ID; IS; p=list(atom); NL { Ast.Definition {name; parts = Array.of_list p} }
+  | n=ID; IS; p=list(atom); NL { Ast.Definition {name = fst n; parts = Array.of_list p} }
   | name=ID; EQUAL; value=list(NUM); NL { Ast.Assignment (name, Array.of_list value) }
 prog: list(stmt); EOF { $1 }
