@@ -1,0 +1,6 @@
+(ocamllex (modules UVa_lexer))
+(menhir (modules UVa_parser))
+(executables
+ (names test_lexer test_parser test)
+ (libraries ppx_deriving ppx_import)
+ (preprocess (staged_pps ppx_import ppx_deriving.show)))
