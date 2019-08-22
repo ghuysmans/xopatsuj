@@ -11,6 +11,7 @@
 atom:
   | LENGTH { Ast.Length $1 }
   | ID { Ast.Ref $1 }
-def: name=ID; IS; parts=list(atom); NL { Ast.{name; parts} }
-assgt: name=ID; EQUAL; value=list(NUM); NL { (name, Array.of_list value) }
-prog: list(def); list(assgt); EOF { $1, $2 }
+stmt:
+  | name=ID; IS; parts=list(atom); NL { Ast.Definition {name; parts} }
+  | name=ID; EQUAL; value=list(NUM); NL { Ast.Assignment (name, Array.of_list value) }
+prog: list(stmt); EOF { $1 }
