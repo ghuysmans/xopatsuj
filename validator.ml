@@ -3,13 +3,13 @@ open Ast
 type 'a m = {actual: 'a; expected: 'a}
 exception Too_long of int m
 exception Too_short
-exception Inconsistent_data of string list * int array m
+exception Inconsistent_data of (Compiler.u def * int) list * int array m
 
 let foldi_left f init a =
   Array.fold_left (fun (i, acc) x -> i + 1, f ~i acc x) (0, init) a |> snd
 
 let unify typ value =
-  let rec f stack start (Compiler.U {name; parts}) = (* returns an index *)
+  let rec f stack start (Compiler.U ({parts; _} as d)) = (* returns an index *)
     parts |> foldi_left (fun ~i pos -> function
       | Empty len ->
         if pos < Array.length value && pos + len <= Array.length value then
@@ -24,11 +24,11 @@ let unify typ value =
           if expected = actual then
             pos + Array.length expected
           else
-            raise (Inconsistent_data (List.rev (name :: stack), {expected; actual}))
+            raise (Inconsistent_data (List.rev ((d, i) :: stack), {expected; actual}))
         else
           raise Too_short
       | Ref u ->
-        f (name :: stack) pos u
+        f ((d, i) :: stack) pos u
     ) start
   in
   let actual = f [] 0 typ in

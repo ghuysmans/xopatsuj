@@ -27,10 +27,11 @@ let () =
             fprintf ppf "[%a]" (pp_print_list ~pp_sep pp_print_int)
           in
           let pp' ppf =
-            let pp_sep ppf () = Format.pp_print_char ppf '.' in
-            pp_print_list ~pp_sep pp_print_string ppf
+            let pp_sep ppf () = Format.pp_print_string ppf " -> " in
+            let pp ppf (Ast.{name; _}, i) = fprintf ppf "%s.(%d)" name i in
+            pp_print_list ~pp_sep pp ppf
           in
-          eprintf "%d:%a: expected %a, got %a\n" l pp' p pp expected pp actual
+          eprintf "%d: In %a: expected %a, got %a\n" l pp' p pp expected pp actual
     done
   with
   | End_of_file ->

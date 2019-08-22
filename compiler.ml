@@ -18,13 +18,13 @@ let link env = function
 
 exception Redefinition of string
 
-let add env {name; parts} =
+let add env {name; parts; loc} =
   if Hashtbl.mem env name then
     (* avoid shadowing *)
     raise (Redefinition name)
   else
     let parts = Array.map (link env) parts in
-    Hashtbl.add env name (U {name; parts})
+    Hashtbl.add env name (U {name; parts; loc})
 
 let create () =
   Hashtbl.create 10
@@ -33,9 +33,9 @@ let create () =
 let sample =
   let env = create () in
   List.iter (add env) [
-    {name = "A"; parts = [|Empty 1|]};
-    {name = "B"; parts = [|Empty 3|]};
-    {name = "C"; parts = [|Ref "A"; Ref "B"|]};
-    {name = "SEQ"; parts = [|Empty 1; Ref "A"; Empty 4; Ref "C"; Ref "B"; Ref "A"|]};
+    {loc = 1; name = "A"; parts = [|Empty 1|]};
+    {loc = 2; name = "B"; parts = [|Empty 3|]};
+    {loc = 3; name = "C"; parts = [|Ref "A"; Ref "B"|]};
+    {loc = 4; name = "SEQ"; parts = [|Empty 1; Ref "A"; Empty 4; Ref "C"; Ref "B"; Ref "A"|]};
   ];
   env

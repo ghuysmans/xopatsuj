@@ -5,6 +5,7 @@ type 'r atom =
   [@@deriving show {with_path = false}]
 
 type 'r def = {
+  loc: int;
   name: string;
   (* is *)
   parts: 'r atom array;
