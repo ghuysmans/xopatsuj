@@ -31,8 +31,8 @@ let unify typ value =
         f ((d, i) :: stack) pos u
     ) start
   in
-  let actual = f [] 0 typ in
-  let expected = Array.length value in
+  let expected = f [] 0 typ in
+  let actual = Array.length value in
   if actual <> expected then raise (Too_long {expected; actual})
 
 
