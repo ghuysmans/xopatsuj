@@ -10,23 +10,18 @@ let () =
       | Ast.Assignment ((n, l), v) ->
         let t = Compiler.find env n in
         let open Format in
-        Compiler.reset env;
         try
           Validator.unify t v
         with
         | Validator.Too_long {actual; expected} ->
           err := true;
-          eprintf "%d:%s: too many values (%d > %d)\n" l n actual expected
+          eprintf "%d: Too many values (%d > %d)\n" l actual expected
         | Validator.Too_short ->
           err := true;
-          eprintf "%d:%s: not enough data\n" l n
+          eprintf "%d: Not enough data\n" l
         | Validator.Inconsistent_data (p, {actual; expected}) ->
           err := true;
-          let pp ppf a =
-            let pp_sep ppf () = Format.pp_print_string ppf "; " in
-            Array.to_list a |>
-            fprintf ppf "[%a]" (pp_print_list ~pp_sep pp_print_int)
-          in
+          let pp ppf (`Pos p) = fprintf ppf "%d@%d" v.(p) p in
           let pp' ppf =
             let pp_sep ppf () = Format.pp_print_string ppf " -> " in
             let pp ppf (Ast.{name; _}, i) = fprintf ppf "%s.(%d)" name i in

@@ -3,32 +3,33 @@ open Ast
 type 'a m = {actual: 'a; expected: 'a}
 exception Too_long of int m
 exception Too_short
-exception Inconsistent_data of (Compiler.u def * int) list * int array m
+exception Inconsistent_data of (Compiler.u def * int) list * [`Pos of int] m
 
 let foldi_left f init a =
   Array.fold_left (fun (i, acc) x -> i + 1, f ~i acc x) (0, init) a |> snd
 
 let unify typ value =
   let rec f stack start (Compiler.U ({parts; _} as d)) = (* returns an index *)
+    let h = Hashtbl.create (Array.length parts) in
     parts |> foldi_left (fun ~i pos -> function
-      | Empty len ->
-        if pos < Array.length value && pos + len <= Array.length value then
-          parts.(i) <- Assigned (Array.sub value pos len)
-        else
+      | Length len ->
+        if pos >= Array.length value || pos + len > Array.length value then
           raise Too_short;
         pos + len
-      | Assigned expected ->
-        let len = Array.length expected in
-        if pos < Array.length value && pos + len <= Array.length value then
-          let actual = Array.sub value pos len in
-          if expected = actual then
-            pos + Array.length expected
-          else
-            raise (Inconsistent_data (List.rev ((d, i) :: stack), {expected; actual}))
-        else
-          raise Too_short
       | Ref u ->
-        f ((d, i) :: stack) pos u
+        let pos' = f ((d, i) :: stack) pos u in (* TODO dedicated length? *)
+        (match Hashtbl.find_opt h u with
+        | None ->
+          Hashtbl.replace h u pos
+        | Some o ->
+          let len = pos' - pos in
+          for i = 0 to len - 1 do
+            if value.(pos + i) <> value.(o + i) then
+              let expected = `Pos (o + i) in
+              let actual = `Pos (pos + i) in
+              raise (Inconsistent_data (List.rev ((d, i) :: stack), {expected; actual}))
+          done);
+        pos'
     ) start
   in
   let expected = f [] 0 typ in

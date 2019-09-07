@@ -1,6 +1,5 @@
 type 'r atom =
-  | Empty of int
-  | Assigned of int array
+  | Length of int
   | Ref of 'r
   [@@deriving show {with_path = false}]
 

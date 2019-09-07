@@ -9,7 +9,7 @@
 %%
 
 atom:
-  | LENGTH { Ast.Empty $1 }
+  | LENGTH { Ast.Length $1 }
   | ID { Ast.Ref (fst $1) }
 stmt:
   | n=ID; IS; p=list(atom); NL {
